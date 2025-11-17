@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>React Basics</title>
+    <title>Chatbot</title>
   </head>
   <body>
     <div class="js-container"></div>
@@ -9,63 +9,155 @@
     <script src="./External libraries/react.js"></script>
     <script src="./External libraries/react-dom.js"></script>
 
+    <script src="./External libraries/chatbot.js"></script>
+
     <script src="./External libraries/babel.js"></script>
     <script type="text/babel">
-      function ProductDetails({ product, price, discountPrice, imgSrc }) {
+      function ChatInput({ chatMessages, setChatMessages }) {
+        const [inputText, setInputText] = React.useState("");
+
+        function saveInputText(event) {
+          setInputText(event.target.value);
+        }
+
+        function saveInputTextKey(event) {
+          if (event.key === "Enter") {
+            if (event.key === 'Enter') 
+            sendMessage() ;
+          else
+            console.log('hello');
+          }
+        }
+
+        function sendMessage() {
+          const newChatMessages = [
+            ...chatMessages,
+            {
+              message: inputText,
+              sender: "user",
+              id: crypto.randomUUID(),
+            },
+          ];
+
+          setChatMessages(newChatMessages);
+
+          const response = Chatbot.getResponse(inputText);
+          setChatMessages([
+            ...newChatMessages,
+            {
+              message: response,
+              sender: "robot",
+              id: crypto.randomUUID(),
+            },
+          ]);
+
+          setInputText("");
+        }
+
+        return (
+          <>
+            <input
+              placeholder="Send a message to Chatbot"
+              size="30"
+              onChange={saveInputText}
+              onKeyDown={saveInputTextKey}
+              value={inputText}
+            />
+            <button onClick={sendMessage}>Send</button>
+          </>
+        );
+      }
+
+      function ChatMessage(/*props*/ { message, sender }) {
+        //const message = props.message;
+        //const sender = props.sender;
+        //const { message, sender } = props;
+
+        /*if (sender === "robot") {
+          return (
+            // JSX CODE
+            <div>
+              <img
+                src="./Assets/images/ChatGPT Image Aug 8, 2025, 11_01_36 AM.png"
+                width="70"
+              />
+              {message}
+            </div>
+          );
+        }*/
         return (
           <div>
-
-            <img src={imgSrc} width = "150"/>
-
-            <p>{product}</p>
-
-            {!discountPrice ? 
-            (
-              <p>Price: ${price}</p>
-            ) 
-            : 
-            (
-              <>
-                <p><del>Price: ${price}</del></p>
-                <p>Discount price: ${discountPrice}</p>
-              </>
+            {sender === "robot" && (
+              <img
+                src="./Assets/images/ChatGPT Image Aug 8, 2025, 11_01_36 AM.png"
+                width="50"
+              />
             )}
-
-            <button>Add to Cart</button>
+            {message}
+            {sender === "user" && (
+              <img src="./Assets/images/miles morales.jpg" width="50" />
+            )}
           </div>
-        )
+        );
+      }
+
+      function ChatMessages({ chatMessages }) {
+        return (
+          <>
+            {chatMessages.map((chatMessage) => {
+              return (
+                <ChatMessage
+                  message={chatMessage.message}
+                  sender={chatMessage.sender}
+                  key={chatMessage.id}
+                />
+              );
+            })}
+          </>
+        );
       }
 
       function App() {
+        const [chatMessages, setChatMessages] = React.useState([
+          {
+            message: "Hello Chat",
+            sender: "user",
+            id: "id1",
+          },
+          {
+            message: "Hello, How can I help you?",
+            sender: "robot",
+            id: "id2",
+          },
+          {
+            message: "Tell me today's date",
+            sender: "user",
+            id: "id3",
+          },
+          {
+            message: "November 11",
+            sender: "robot",
+            id: "id4",
+          },
+        ]);
+
+        // const [chatMessages, setChatMessages] = array;
+        // const chatMessages = array[0];
+        // const setChatMessages = array[1];
+
         return (
           <>
-            <ProductDetails
-              product="Cotton socks"
-              price="$10.90"
-              discountPrice="$5.45"
-              imgSrc="./Assets/images/cotton-socks.png"
-              />
-              
-              <ProductDetails
-              product="Tennis balls"
-              price="$6.00"
-              imgSrc="./Assets/images/tennis-balls.png"
-              // discountPrice="$5.45"
-              />
-              
-              <ProductDetails
-              product="Plain T-Shirt"
-              price="$7.99"
-              imgSrc="./Assets/images/plain-t-shirt.png"
-              // discountPrice="$5.45"
+            <ChatInput
+              chatMessages={chatMessages}
+              setChatMessages={setChatMessages}
             />
+            <ChatMessages chatMessages={chatMessages} />
           </>
         );
       }
 
       const container = document.querySelector(".js-container");
-      const root = ReactDOM.createRoot(container);
-      root.render(<App />);
+      ReactDOM.createRoot(container).render(<App />);
     </script>
   </body>
 </html>
